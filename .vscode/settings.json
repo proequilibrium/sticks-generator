@@ -1,5 +1,5 @@
 {
     "python.pythonPath": "/home/recoder/.virtualenvs/pdfmagic/bin/python3",
-    "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true
+    "python.linting.pylance": true,
+    "python.linting.enabled": true,
 }

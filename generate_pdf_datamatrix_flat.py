@@ -1,37 +1,31 @@
 #!/home/recoder/.virtualenvs/pdfmagic/bin/python
 import argparse
 import time
-import os
-#from create_ean_line import GEN_START, GEN_STOP
-from fpdf import FPDF
-import dataFromExcelsheet as exS
 
-print('script zacina loaduji knihovny...')
+# from create_ean_line import GEN_START, GEN_STOP
+from fpdf import FPDF
+import data_from_excelsheet as exS
+
+print("script zacina loaduji knihovny...")
 
 starttime = time.time()
 print("zaciname")
 
-desFormat = (190, 45)
-textPosition = (32, 32)
-datamatrixSize = (40, 40)
-arrowSize = (25, 25)
+DESIRED_FORMAT = (190, 45)
+TEXT_POSITION = (32, 32)
+DATAMATRIX_SIZE = (40, 40)
+ARROW_SIZE = (25, 25)
 
-margin = 2
-bleed = 2
-textPosition = textPosition[0] + bleed, textPosition[1] + bleed
-resultFormat = (desFormat[0]+2*bleed, desFormat[1]+2*bleed)
-
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('rows', type=int, default=1,
-                    help='number of rows')
-parser.add_argument('-f', '--filopen', dest='file_to_open',
-                    action='store_true', default='cagobelo')
+MARGIN = 2
+BLEED = 2
+TEXT_POSITION = TEXT_POSITION[0] + BLEED, TEXT_POSITION[1] + BLEED
+resultFormat = (DESIRED_FORMAT[0] + 2 * BLEED, DESIRED_FORMAT[1] + 2 * BLEED)
 
 
 def DeckSort(filename):
-    code = filename[1:].split('-')
+    code = filename[1:].split("-")
     code[1], code[2] = code[2], code[1]
-    total = str(ord(filename[0])) + ''.join(code)
+    total = str(ord(filename[0])) + "".join(code)
     return int(total)
 
 
@@ -40,13 +34,15 @@ def biNumToInt(biNum):
 
 
 def addCutting(sourcePdf):
+    # TODO add spot color for cutting
     pass  # sourcePdf.setDrawSpotColor('opos',100)
 
 
 def getCodes(fileName):
     import pickle
+
     exportNames = []
-    codes_list = pickle.load(open(fileName, 'rb'))
+    codes_list = pickle.load(open(fileName, "rb"))
     for keys, codes in codes_list.items():
         exportNames.extend(codes)
     return exportNames
@@ -60,33 +56,32 @@ def returnCodesWithBeggining(wholeList, firstLetter):
     return namesToReturn
 
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('rows', type=int, default=1,
-                    help='number of rows')
+parser = argparse.ArgumentParser(description="Process some integers.")
+parser.add_argument("--rows", type=int, default=1, help="number of rows")
 # # parser.add_argument('--file', dest='accumulate', action='store_const',
 # #                     const=sum, nargs="?", default=max,
 #                     help='sum the integers (default: find the max)')
-parser.add_argument('-f', '--filopen', dest='file_to_open',
-                    action='store_true', default='dumped_codes')
+parser.add_argument("-f", "--fileopen", dest="file_to_open", default="dumped_codes")
 
 args = parser.parse_args()
 
-pdf = FPDF(orientation="P", unit='mm', format=resultFormat)
+pdf = FPDF(orientation="P", unit="mm", format=resultFormat)
 
-pdf.set_font('Helvetica', style='B', size=36)
+pdf.set_font("Helvetica", style="B", size=36)
 pdf.set_text_color(0, 0, 0)  # text set to black
 
 pdf.set_line_width(1)  # box bounding
-dmtxFiles = exS.get_lost_values_list(excelSheet='missing_labels.xlsx', lines=54)
-dmtxFiles.sort(key=DeckSort)
-partDMTX = dmtxFiles
-#partDMTX = returnCodesWithBeggining(dmtxFiles, ['G','H','I'])
+# dmtxFiles = exS.get_lost_values_list(excelSheet='missing_labels.xlsx', lines=54)
+sticker_name = []
+with open(args.file_to_open, "r") as snames:
+    snames = snames.read().splitlines()
 
-for xth, imageName in enumerate(partDMTX):
+snames.sort(key=DeckSort)
+# partDMTX = returnCodesWithBeggining(dmtxFiles, ['G','H','I'])
+
+for xth, imageName in enumerate(snames):
 
     firstLetter = imageName[0]
-    if firstLetter == 'I':
-        firstLetter = " I"
 
     horizontalPositon = int(imageName[8])
     print(imageName, horizontalPositon)
@@ -95,64 +90,71 @@ for xth, imageName in enumerate(partDMTX):
     # pdf.set_fill_color(0,0,0)
 
     pdf.set_fill_color(255, 255, 115)  # zluty podklad
-    pdf.rect(0, 0, resultFormat[0], resultFormat[1], style='F')
+    pdf.rect(0, 0, resultFormat[0], resultFormat[1], style="F")
 
     if horizontalPositon == 1:
         # DOWN
         # First Letter
-        pdf.set_font('Helvetica', style="B", size=65)
-        pdf.text(resultFormat[0] - 21 - bleed - margin,
-                 18 + bleed + margin, firstLetter)
+        pdf.set_font("Helvetica", style="B", size=65)
+        pdf.text(
+            resultFormat[0] - 21 - BLEED - MARGIN, 18 + BLEED + MARGIN, firstLetter
+        )
 
         # Main code text
-        pdf.set_font('Helvetica', style="B", size=80)
-        pdf.text(textPosition[0]+(margin*5)+bleed,
-                 textPosition[1], imageName[1:])
+        pdf.set_font("Helvetica", style="B", size=80)
+        pdf.text(TEXT_POSITION[0] + (MARGIN * 5) + BLEED, TEXT_POSITION[1], imageName[1:])
 
         # Arrow
-        pdf.image("./arrowDown.png",
-                  x=resultFormat[0]-arrowSize[0]-margin-bleed,
-                  y=18 + bleed,
-                  w=arrowSize[0],
-                  h=arrowSize[1])
+        pdf.image(
+            "./arrowDown.png",
+            x=resultFormat[0] - ARROW_SIZE[0] - MARGIN - BLEED,
+            y=18 + BLEED,
+            w=ARROW_SIZE[0],
+            h=ARROW_SIZE[1],
+        )
 
         # Datamatrix
-        pdf.image("./data/dmtx/" + str(imageName) + ".png",
-                  x=margin+bleed,
-                  y=margin+bleed,
-                  w=datamatrixSize[0],
-                  h=datamatrixSize[1])
+        pdf.image(
+            "./data/dmtx/" + str(imageName) + ".png",
+            x=MARGIN + BLEED,
+            y=MARGIN + BLEED,
+            w=DATAMATRIX_SIZE[0],
+            h=DATAMATRIX_SIZE[1],
+        )
 
     else:
         if horizontalPositon == 2:
             # UP
             # First Letter
-            pdf.set_font('Helvetica', style="B", size=65)
-            pdf.text(4 + margin + bleed,
-                     resultFormat[1] - margin - bleed, firstLetter)
+            pdf.set_font("Helvetica", style="B", size=65)
+            pdf.text(4 + MARGIN + BLEED, resultFormat[1] - MARGIN - BLEED, firstLetter)
 
             # Arrow
-            pdf.image("./arrowUp.png",
-                      x=margin + bleed,
-                      y=margin + bleed,
-                      w=arrowSize[0],
-                      h=arrowSize[1])
+            pdf.image(
+                "./arrowUp.png",
+                x=MARGIN + BLEED,
+                y=MARGIN + BLEED,
+                w=ARROW_SIZE[0],
+                h=ARROW_SIZE[1],
+            )
         else:
             # others which i s higher
             # First Letter
-            pdf.set_font('Helvetica', style="B", size=100)
-            pdf.text(margin + bleed, 40 - margin - bleed, firstLetter)
+            pdf.set_font("Helvetica", style="B", size=100)
+            pdf.text(MARGIN + BLEED, 40 - MARGIN - BLEED, firstLetter)
 
         # Main code text
-        pdf.set_font('Helvetica', style="B", size=80)
-        pdf.text(textPosition[0], textPosition[1], imageName[1:])
+        pdf.set_font("Helvetica", style="B", size=80)
+        pdf.text(TEXT_POSITION[0], TEXT_POSITION[1], imageName[1:])
 
         # Datamatrix
-        pdf.image("./data/dmtx/" + str(imageName) + ".png",
-                  x=resultFormat[0]-datamatrixSize[0]-margin-bleed,
-                  y=resultFormat[1]-datamatrixSize[1]-margin-bleed,
-                  w=datamatrixSize[0],
-                  h=datamatrixSize[1])
+        pdf.image(
+            "./data/dmtx/" + str(imageName) + ".png",
+            x=resultFormat[0] - DATAMATRIX_SIZE[0] - MARGIN - BLEED,
+            y=resultFormat[1] - DATAMATRIX_SIZE[1] - MARGIN - BLEED,
+            w=DATAMATRIX_SIZE[0],
+            h=DATAMATRIX_SIZE[1],
+        )
 
     if (xth % 100) == 0:
         newtime = time.time()
@@ -161,6 +163,6 @@ for xth, imageName in enumerate(partDMTX):
 
     if (xth % 1000) == 999:
         pdf.output("export/datamatrix-dodelavka" + str(xth) + ".pdf", "F")
-        pdf = FPDF(orientation="P", unit='mm', format=resultFormat)
+        pdf = FPDF(orientation="P", unit="mm", format=resultFormat)
 
-pdf.output("export/datamatrix-dodelavka.pdf", "F")
+pdf.output("export/datamatrix.pdf", "F")
