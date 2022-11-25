@@ -21,8 +21,23 @@ def get_num_stacks(codes_list):
         nums[len(codes)] += 1
     return nums
 
+def get_batched_codes(codes_list):
+    batched_codes = {}
+    for code in codes_list:
+        stage_key = get_stack(code)
+        if stage_key in batched_codes:
+            batched_codes[stage_key].append(code)
+        else:
+            batched_codes[stage_key] = [code]
+    return batched_codes
 
-def get_values_from_xlsx(excelSheet="stow/regalyVB.xlsx", lines=1):
+def prepair_data_for_generation(excelSheet="stow/regalyVB.xlsx") -> dict:
+    codes_list = get_values_from_xlsx(excelSheet)
+    codes_list = map_codes(codes_list)
+    batched_codes = get_batched_codes(codes_list)
+    return batched_codes
+
+def get_values_from_xlsx(excelSheet="stow/regalyVB.xlsx"):
     regalFilter = re.compile("^[A-Z][0-9]{2}-[0-9]{2}-[0-9]{2}$")
 
     wb = load_workbook(excelSheet)
@@ -61,7 +76,7 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--file", type=str, default="stow/regalyVB.xlsx", help="Excel file")
     args = parser.parse_args()
 
-    codes = get_values_from_xlsx(excelSheet=args.file, lines=5)
+    codes = get_values_from_xlsx(excelSheet=args.file)
     maped_codes=map_codes(codes)
     print(maped_codes)
     print(len(maped_codes))

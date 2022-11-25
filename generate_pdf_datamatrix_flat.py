@@ -1,15 +1,18 @@
 #!/home/recoder/.virtualenvs/pdfmagic/bin/python
 import argparse
 import time
-
+from pathlib import Path
 # from create_ean_line import GEN_START, GEN_STOP
 from fpdf import FPDF
 import data_from_excelsheet as exS
 
-print("script zacina loaduji knihovny...")
+from helper_functions.datamatrixgen import create_one_dmtx_from_code
+
 
 starttime = time.time()
-print("zaciname")
+print("starting...")
+
+DMTX_FILES = "data/dmtx/"
 
 DESIRED_FORMAT = (190, 45)
 TEXT_POSITION = (32, 32)
@@ -73,8 +76,12 @@ pdf.set_text_color(0, 0, 0)  # text set to black
 pdf.set_line_width(1)  # box bounding
 # dmtxFiles = exS.get_lost_values_list(excelSheet='missing_labels.xlsx', lines=54)
 sticker_name = []
-with open(args.file_to_open, "r") as snames:
-    snames = snames.read().splitlines()
+from data_from_excelsheet import prepair_data_for_generation
+snames_data = prepair_data_for_generation(excelSheet="stow/regalyVB.xlsx")
+
+snames=[]
+for data in snames_data:
+    snames.extend(snames_data[data])
 
 snames.sort(key=DeckSort)
 # partDMTX = returnCodesWithBeggining(dmtxFiles, ['G','H','I'])
@@ -106,7 +113,7 @@ for xth, imageName in enumerate(snames):
 
         # Arrow
         pdf.image(
-            "./arrowDown.png",
+            "./aux_files/arrowDown.png",
             x=resultFormat[0] - ARROW_SIZE[0] - MARGIN - BLEED,
             y=18 + BLEED,
             w=ARROW_SIZE[0],
@@ -114,13 +121,17 @@ for xth, imageName in enumerate(snames):
         )
 
         # Datamatrix
+        image = create_one_dmtx_from_code(imageName)
+        image_path = Path(DMTX_FILES + imageName + ".png")
+        image.save(image_path)
         pdf.image(
-            "./data/dmtx/" + str(imageName) + ".png",
+            str(image_path),
             x=MARGIN + BLEED,
             y=MARGIN + BLEED,
             w=DATAMATRIX_SIZE[0],
             h=DATAMATRIX_SIZE[1],
         )
+        image_path.unlink()
 
     else:
         if horizontalPositon == 2:
@@ -131,7 +142,7 @@ for xth, imageName in enumerate(snames):
 
             # Arrow
             pdf.image(
-                "./arrowUp.png",
+                "./aux_files/arrowUp.png",
                 x=MARGIN + BLEED,
                 y=MARGIN + BLEED,
                 w=ARROW_SIZE[0],
@@ -148,13 +159,17 @@ for xth, imageName in enumerate(snames):
         pdf.text(TEXT_POSITION[0], TEXT_POSITION[1], imageName[1:])
 
         # Datamatrix
+        image = create_one_dmtx_from_code(imageName)
+        image_path = Path(DMTX_FILES + imageName + ".png")
+        image.save(image_path)
         pdf.image(
-            "./data/dmtx/" + str(imageName) + ".png",
+            str(image_path),
             x=resultFormat[0] - DATAMATRIX_SIZE[0] - MARGIN - BLEED,
             y=resultFormat[1] - DATAMATRIX_SIZE[1] - MARGIN - BLEED,
             w=DATAMATRIX_SIZE[0],
             h=DATAMATRIX_SIZE[1],
         )
+        image_path.unlink()
 
     if (xth % 100) == 0:
         newtime = time.time()
@@ -162,7 +177,7 @@ for xth, imageName in enumerate(snames):
         starttime = newtime
 
     if (xth % 1000) == 999:
-        pdf.output("export/datamatrix-dodelavka" + str(xth) + ".pdf", "F")
+        pdf.output("export/stow" + str(xth) + ".pdf", "F")
         pdf = FPDF(orientation="P", unit="mm", format=resultFormat)
 
-pdf.output("export/datamatrix.pdf", "F")
+pdf.output("export/stow-rest.pdf", "F")
