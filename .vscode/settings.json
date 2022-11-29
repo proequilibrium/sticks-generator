@@ -2,4 +2,7 @@
     "python.pythonPath": "/home/recoder/.virtualenvs/pdfmagic/bin/python3",
     "python.linting.pylance": true,
     "python.linting.enabled": true,
+    "python.linting.flake8Args": [
+        "--max-line-length=120"
+    ],
 }

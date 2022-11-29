@@ -12,5 +12,14 @@
             "console": "integratedTerminal",
             "justMyCode": false
         },
+        {
+            "name": "Join pages2",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/joinpages_2onepage.py",
+            "args": ["--path", "./export/test/input"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
     ]
 }
