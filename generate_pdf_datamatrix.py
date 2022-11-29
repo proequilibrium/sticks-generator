@@ -6,6 +6,7 @@
 import time
 import pickle
 from pathlib import Path
+
 # from create_ean_line import GEN_START, GEN_STOP
 from fpdf import FPDF
 from data_from_excelsheet import prepair_data_for_generation
@@ -134,6 +135,7 @@ def get_codes_with_exact_num(exact_num):
                 export_stage_sizes[stage_key] = 1
         return (export_name, export_stage_sizes)
 
+
 def get_stage_widths(stage_batches: dict):
     """
     filter codes
@@ -142,7 +144,9 @@ def get_stage_widths(stage_batches: dict):
     get_stage_offset = {}
     for stage_key, val in stage_batches.items():
         get_stage_widths[stage_key] = len(set([get_stack_pos(x) for x in val]))
-        get_stage_offset[stage_key] = get_stage_widths[stage_key] - max([get_stack_pos(x) for x in val])
+        get_stage_offset[stage_key] = get_stage_widths[stage_key] - max(
+            [get_stack_pos(x) for x in val]
+        )
     return get_stage_widths, get_stage_offset
 
 
@@ -170,8 +174,9 @@ def add_datamatrix(source_page, x_position, datamatrix_name):
         w=DATAMATRIX_SIZE[0],
         h=DATAMATRIX_SIZE[1],
     )
-    #remove image
+    # remove image
     image_path.unlink()
+
 
 # TODO
 # def add_page(
@@ -207,7 +212,7 @@ if __name__ == "__main__":
 
     for xth, (stage, positions) in enumerate(stages_codes.items()):
         if xth > (50):
-            print('FORCED BREAK')
+            print("FORCED BREAK")
             break
 
         # veariables for code parts
@@ -219,9 +224,7 @@ if __name__ == "__main__":
 
             if stage != workon_stage:
                 starttime = time.time()
-                pdf.output(
-                    f"./export/square/datamatrix-{generated}-{stage}.pdf", "F"
-                )
+                pdf.output(f"./export/square/datamatrix-{generated}-{stage}.pdf", "F")
                 generated = 0
                 print(f"Ukladam {xth} pdf {time.time() - starttime}")
 
@@ -244,7 +247,9 @@ if __name__ == "__main__":
                 pdf.text(codePosition[0], codePosition[1], codeWithoutLetter)
 
                 datamatrixX = draw_rect_return_datam_position(
-                    pdf, stage_widths[stage], positionOnLevel + stage_widths_ofset[stage]
+                    pdf,
+                    stage_widths[stage],
+                    positionOnLevel + stage_widths_ofset[stage],
                 )
 
                 add_datamatrix(pdf, datamatrixX, position)

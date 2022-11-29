@@ -4,10 +4,8 @@ from openpyxl import load_workbook
 import re
 import pprint
 
-MAPPING = {
-    "P": ["A","B","E","F"],
-    "R": ["C","D","G","H"]
-    }
+MAPPING = {"P": ["A", "B", "E", "F"], "R": ["C", "D", "G", "H"]}
+
 
 def get_stack(cell_vall):
     return cell_vall[:3]
@@ -21,6 +19,7 @@ def get_num_stacks(codes_list):
         nums[len(codes)] += 1
     return nums
 
+
 def get_batched_codes(codes_list):
     batched_codes = {}
     for code in codes_list:
@@ -31,11 +30,13 @@ def get_batched_codes(codes_list):
             batched_codes[stage_key] = [code]
     return batched_codes
 
+
 def prepair_data_for_generation(excelSheet="stow/regalyVB.xlsx") -> dict:
     codes_list = get_values_from_xlsx(excelSheet)
     codes_list = map_codes(codes_list)
     batched_codes = get_batched_codes(codes_list)
     return batched_codes
+
 
 def get_values_from_xlsx(excelSheet="stow/regalyVB.xlsx"):
     regalFilter = re.compile("^[A-Z][0-9]{2}-[0-9]{2}-[0-9]{2}$")
@@ -47,8 +48,10 @@ def get_values_from_xlsx(excelSheet="stow/regalyVB.xlsx"):
     codes = 0
 
     codes_list = []
-    print(ws['X40'].value, f"{ws.max_column=}, {ws.max_row=}")
-    for column in ws.iter_cols(min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
+    print(ws["X40"].value, f"{ws.max_column=}, {ws.max_row=}")
+    for column in ws.iter_cols(
+        min_row=1, max_row=ws.max_row, min_col=1, max_col=ws.max_column
+    ):
 
         for cell in column:
             code_line = cell.value
@@ -63,20 +66,28 @@ def get_values_from_xlsx(excelSheet="stow/regalyVB.xlsx"):
     return codes_list
     # print("pocty: \n", list(map(lambda x : x.value >0,get_num_stacks(codes_list))))
 
+
 def map_codes(codes_list):
     maped = []
     for from_value, to_values in MAPPING.items():
         for to_value in to_values:
-            new_maped = [ code.replace(from_value, to_value) for code in codes_list if code[0] in from_value]
+            new_maped = [
+                code.replace(from_value, to_value)
+                for code in codes_list
+                if code[0] in from_value
+            ]
             maped.extend(new_maped)
     return maped
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file", type=str, default="stow/regalyVB.xlsx", help="Excel file")
+    parser.add_argument(
+        "-f", "--file", type=str, default="stow/regalyVB.xlsx", help="Excel file"
+    )
     args = parser.parse_args()
 
     codes = get_values_from_xlsx(excelSheet=args.file)
-    maped_codes=map_codes(codes)
+    maped_codes = map_codes(codes)
     print(maped_codes)
     print(len(maped_codes))

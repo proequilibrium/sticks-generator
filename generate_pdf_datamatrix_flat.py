@@ -2,6 +2,7 @@
 import argparse
 import time
 from pathlib import Path
+
 # from create_ean_line import GEN_START, GEN_STOP
 from fpdf import FPDF
 import data_from_excelsheet as exS
@@ -77,9 +78,10 @@ pdf.set_line_width(1)  # box bounding
 # dmtxFiles = exS.get_lost_values_list(excelSheet='missing_labels.xlsx', lines=54)
 sticker_name = []
 from data_from_excelsheet import prepair_data_for_generation
+
 snames_data = prepair_data_for_generation(excelSheet="stow/regalyVB.xlsx")
 
-snames=[]
+snames = []
 for data in snames_data:
     snames.extend(snames_data[data])
 
@@ -109,7 +111,9 @@ for xth, imageName in enumerate(snames):
 
         # Main code text
         pdf.set_font("Helvetica", style="B", size=80)
-        pdf.text(TEXT_POSITION[0] + (MARGIN * 5) + BLEED, TEXT_POSITION[1], imageName[1:])
+        pdf.text(
+            TEXT_POSITION[0] + (MARGIN * 5) + BLEED, TEXT_POSITION[1], imageName[1:]
+        )
 
         # Arrow
         pdf.image(
