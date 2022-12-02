@@ -2,7 +2,9 @@
 /export/*
 /luggage/*
 /data/*
-
+stow
+PyMuPDF
+/pyfpdf
 *.pdf
 *.pyc
 *.zip
